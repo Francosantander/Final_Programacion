@@ -55,7 +55,7 @@ ROOT_URLCONF = 'moviecity.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': ['D:/Facultad/workspace/Final_Programacion/moviecity/moviecity/templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

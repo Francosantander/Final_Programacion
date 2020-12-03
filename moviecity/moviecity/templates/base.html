@@ -1,0 +1,14 @@
+<html>
+    <head>
+        <title>
+            {% block title %} {% endblock %}
+        </title>
+    </head>
+    <body>
+        {% include "barra.html" %}
+        <h1>
+            Movicity
+        </h1>
+        {% block content %}{% endblock %}     
+    </body>
+</html>
