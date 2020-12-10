@@ -2,7 +2,7 @@ from django.http.response import JsonResponse
 from rest_framework.parsers import JSONParser
 from rest_framework import status
 from django.shortcuts import render
-from gestionCine.models import Pelicula, Salas, Proyeccion, Butacas
+from .models import Pelicula, Salas, Proyeccion, Butacas
 from .serializers import PeliculaSerializer, SalaSerializer, ButacaSerializer, ProyeccionSerializer
 from rest_framework.decorators import api_view
 
