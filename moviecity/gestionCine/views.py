@@ -120,12 +120,22 @@ def proyecciones_list(request):
         proye_serializer = ProyeccionSerializer(proye, many=True)
         return JsonResponse(proye_serializer.data, safe=False,
                             status=status.HTTP_200_OK)
+    elif request.method == 'POST':
+        proye_data = JSONParser().parse(request)
+        proye_serializer = ProyeccionSerializer(data=proye_data)
+        if proye_serializer.is_valid():
+            proye_serializer.save()
+            return validar_proyeccion(proye_data, proye_serializer)
+        return JsonResponse(proye_serializer.errors,
+                            status=status.HTTP_400_BAD_REQUEST)
 
 
 # Endpoint GET + Rango de fechas
+# Arreglar
 @api_view(['GET'])
 def proyeccionesRango(request, pelicula, fecha):
     try:
+        # Ver si poner filter o get
         proye = Proyeccion.objects.filter(pelicula=pelicula)
         proye_serializer = ProyeccionSerializer(proye, many=True)
         return JsonResponse(proye_serializer.data,
@@ -133,3 +143,103 @@ def proyeccionesRango(request, pelicula, fecha):
     except Proyeccion.DoesNotExist:
         return JsonResponse({'Mensaje': 'Los rangos de fechas ingresados son incorrecto'},
                             status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['GET'])
+def modificarProyeccion(request, pk):
+    try:
+        proye = Proyeccion.objects.get(pk=pk)
+        if request.method == 'GET':
+            proyecciones = Proyeccion.objects.all(pk=pk)
+            proye_serializer = ProyeccionSerializer(proyecciones, many=True)
+            return JsonResponse(proye_serializer.data, safe=False,
+                                status=status.HTTP_200_OK)
+        elif request.method == 'PUT':
+            proye_data = JSONParser().parse(request)
+            proye_serializer = ProyeccionSerializer(proye, data=proye_data)
+            if proye_serializer.is_valid():
+                proye_serializer.save()
+                return validar_proyeccion(proye_data, proye_serializer)
+            return JsonResponse(proye_serializer.errors,
+                                status=status.HTTP_400_BAD_REQUEST)
+    except Butacas.DoesNotExist:
+        return JsonResponse({'Mensaje': 'La butaca especificada no existe'},
+                            status=status.HTTP_404_NOT_FOUND)
+
+
+# Terminar de hacer la validacion
+def validar_proyeccion(proye_data, proye_serializer):
+    pass
+
+
+# Endpoint Butacas reservadas
+@api_view(['GET'])
+def butacas_list(request):
+    if request.method == 'GET':
+        butacas = Butacas.objects.all()
+        butacas_serializer = ButacaSerializer(butacas, many=True)
+        return JsonResponse(butacas_serializer.data, safe=False,
+                            status=status.HTTP_200_OK)
+    elif request.method == 'POST':
+        butaca_data = JSONParser().parse(request)
+        butaca_serializer = SalaSerializer(data=butaca_data)
+        if butaca_serializer.is_valid():
+            butaca_serializer.save()
+            return validar_butaca(butaca_data, butaca_serializer)
+        return JsonResponse(butaca_serializer.errors,
+                            status=status.HTTP_400_BAD_REQUEST)
+
+
+# Endpoint get + butaca
+# Endpoint Butacas reservadas
+@api_view(['GET'])
+def butacasEspecifica(request, pk):
+    try:
+        butaca = Butacas.objects.get(pk=pk)
+        if request.method == 'GET':
+            butacas = Butacas.objects.all(pk=pk)
+            butacas_serializer = ButacaSerializer(butacas, many=True)
+            return JsonResponse(butacas_serializer.data, safe=False,
+                                status=status.HTTP_200_OK)
+        elif request.method == 'PUT':
+            butaca_data = JSONParser().parse(request)
+            butaca_serializer = ButacaSerializer(butaca, data=butaca_data)
+            if butaca_serializer.is_valid():
+                butaca_serializer.save()
+                return validar_butaca(butaca_data, butaca_serializer)
+            return JsonResponse(butaca_serializer.errors,
+                                status=status.HTTP_400_BAD_REQUEST)
+    except Butacas.DoesNotExist:
+        return JsonResponse({'Mensaje': 'La butaca especificada no existe'},
+                            status=status.HTTP_404_NOT_FOUND)
+
+
+def validar_butaca(butaca_data, butaca_serializer):
+    # obtengo la proyeccion
+    proyeccion = Proyeccion.objects.get(pk=butaca_data['proyeccion'])
+    # Obtengo la fecha de la proyeccion
+    fecha = dt.datetime.strptime(butaca_data['fecha'],'%Y-%m-%d').date()
+    # Veo que la proyeccion este activa
+    if proyeccion.estado:
+        sala = proyeccion.sala
+        # Verifico que la fecha de la proyeccio este disponible
+        if(fecha <= proyeccion.fechaFin and fecha >= proyeccion.fechaInicio):
+            # Verifico que haya ingresado una fila y una butaca valida
+            if butaca_data['fila'] <= sala.fila and butaca_data['asiento'] <= sala.asientos:
+                # Obtengo todas las butacas de la proyeccion en la fecha ingresada
+                butacas = Butacas.objects.filter(proyeccion=butaca_data['proyeccion'],
+                                                 fecha=dt.datetime.strptime(butaca_data['fecha'], '%Y-%m-%d').date())
+                for butaca in butacas:
+                    # Verifico que la butaca no este reservada
+                    if butaca.fila == butaca_data['fila'] and butaca.asiento == butaca_data['asiento']:
+                        return JsonResponse({'Mensaje': 'La butaca deseada ya esta reservada'},
+                                            status=status.HTTP_400_BAD_REQUEST)
+                # Reservo la butaca
+                butaca_serializer.save()
+                return JsonResponse(butaca_serializer.data, status=status.HTTP_201_CREATED)
+            return JsonResponse({'Mensaje': 'El numero de butaca es invalido para la sala seleccionada'},
+                                status=status.HTTP_400_BAD_REQUEST)
+        return JsonResponse({'Mensaje': 'La fecha seleccionada es invalida para la proyeccion'},
+                            status=status.HTTP_400_BAD_REQUEST)
+    return JsonResponse({'Mensaje': 'La proyeccion especificada esta inhabilitada para reservas'},
+                        status=status.HTTP_400_BAD_REQUEST)
