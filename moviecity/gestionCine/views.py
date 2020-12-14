@@ -3,7 +3,8 @@ from rest_framework.parsers import JSONParser
 from rest_framework import status
 from django.shortcuts import render
 from .models import Pelicula, Salas, Proyeccion, Butacas
-from .serializers import PeliculaSerializer, SalaSerializer, ButacaSerializer, ProyeccionSerializer
+from .serializers import PeliculaSerializer, SalaSerializer, ButacaSerializer
+from .serializers import ProyeccionSerializer
 from rest_framework.decorators import api_view
 import datetime as dt
 
@@ -11,13 +12,6 @@ import datetime as dt
 def principal(request):
     return render(request, "principal.html")
 
-
-def butacas(request):
-    return render(request, "butacas.html")
-
-
-def busqueda_pelis(request):
-    return render(request, "busqueda_pelis.html")
 
 # Endpoint Peliculas
 # Listado de peliculas en un rando de +- 15 dias
@@ -32,12 +26,13 @@ def pelis(request):
                         status=status.HTTP_200_OK)
 
 
-# Ver si anda
+# Arreglar
 # Endpoint pelicula especifica + rango de fecha
 @api_view(['GET'])
 def peli_detail(request, nombre, inicio, fin):
     try:
-        peli = Pelicula.objects.get(nombre=nombre, fechaComienzo=inicio, fechaFinalizacion=fin)
+        peli = Pelicula.objects.get(nombre=nombre, fechaComienzo=inicio,
+                                    fechaFinalizacion=fin)
         pelicula_serializer = PeliculaSerializer(peli)
         return JsonResponse(pelicula_serializer.data,
                             status=status.HTTP_200_OK)
@@ -46,12 +41,12 @@ def peli_detail(request, nombre, inicio, fin):
                             status=status.HTTP_404_NOT_FOUND)
 
 
-# Ver si anda
 # Lista de peliculas especificando un rango de fechas
 @api_view(['GET'])
 def peli_date_detail(request, inicio, fin):
     try:
-        peli = Pelicula.objects.get(fechaComienzo__gte=inicio, fechaFinalizacion__lte=fin)
+        peli = Pelicula.objects.get(fechaComienzo__gte=inicio,
+                                    fechaFinalizacion__lte=fin)
         pelicula_serializer = PeliculaSerializer(peli, many=True)
         return JsonResponse(pelicula_serializer.data,
                             status=status.HTTP_200_OK)
@@ -111,6 +106,11 @@ def sala_detail(request, pk):
                             status=status.HTTP_404_NOT_FOUND)
 
 
+# Valido los datos de la sala
+def validar_sala(sala_serializer, sala_data):
+    pass
+
+
 # Endpoint Proyecciones
 # Endpoint Proyecciones activas
 @api_view(['GET'])
@@ -133,10 +133,11 @@ def proyecciones_list(request):
 # Endpoint GET + Rango de fechas
 # Arreglar
 @api_view(['GET'])
-def proyeccionesRango(request, pelicula, fecha):
+def proyeccionesRango(request, inicio, fin):
     try:
         # Ver si poner filter o get
-        proye = Proyeccion.objects.filter(pelicula=pelicula)
+        proye = Proyeccion.objects.get(fecha_inicio__gte=inicio,
+                                       fecha_fin__lte=fin, estado=True)
         proye_serializer = ProyeccionSerializer(proye, many=True)
         return JsonResponse(proye_serializer.data,
                             status=status.HTTP_200_OK)
@@ -149,6 +150,7 @@ def proyeccionesRango(request, pelicula, fecha):
 def modificarProyeccion(request, pk):
     try:
         proye = Proyeccion.objects.get(pk=pk)
+        # Traigo una proyeccion en particular
         if request.method == 'GET':
             proyecciones = Proyeccion.objects.all(pk=pk)
             proye_serializer = ProyeccionSerializer(proyecciones, many=True)
@@ -165,6 +167,12 @@ def modificarProyeccion(request, pk):
     except Butacas.DoesNotExist:
         return JsonResponse({'Mensaje': 'La butaca especificada no existe'},
                             status=status.HTTP_404_NOT_FOUND)
+
+
+# Get + proyeccion + fecha
+@api_view(['GET'])
+def proyePeliRango(request, pelicula, fecha):
+    pass
 
 
 # Terminar de hacer la validacion
@@ -243,3 +251,28 @@ def validar_butaca(butaca_data, butaca_serializer):
                             status=status.HTTP_400_BAD_REQUEST)
     return JsonResponse({'Mensaje': 'La proyeccion especificada esta inhabilitada para reservas'},
                         status=status.HTTP_400_BAD_REQUEST)
+
+
+# Reportes
+# Reporte Butacas -> Rango de tiempo
+@api_view(['GET'])
+def reporteButacasRango(request, inicio, fin):
+    pass
+
+
+# Reporte Butacas -> Proyeccion + Rango de tiempo
+@api_view(['GET'])
+def reporteButacasProyeccionRango(request, proyeccion, inicio, fin):
+    pass
+
+
+# Reporte Ranking 5 peliculas mas vendidas -> Rango de tiempo
+@api_view(['GET'])
+def reporteRanking(request, inicio, fin):
+    pass
+
+
+# Reporte butacas vendidas en las peliculas activas -> Rango de tiempo
+@api_view(['GET'])
+def reportePeliculasActivas(request, inicio, fin):
+    pass
