@@ -4,7 +4,7 @@ from django.db import models
 class Pelicula(models.Model):
     ID_Peli = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=50)
-    duracion = models.IntegerField(null=True)
+    duracion = models.IntegerField()
     descripcion = models.TextField()
     detalle = models.TextField()
     genero = models.CharField(max_length=50)
