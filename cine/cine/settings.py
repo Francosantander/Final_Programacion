@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'gestionCine',
     'corsheaders',
+    'django_extensions',
 ]
 
 MIDDLEWARE = [

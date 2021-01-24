@@ -1,7 +1,7 @@
 from django.http.response import JsonResponse
 from rest_framework.parsers import JSONParser
 from rest_framework import status
-from django.shortcuts import render
+# from django.shortcuts import render
 from .models import Pelicula, Salas, Proyeccion, Butacas
 from .serializers import PeliculaSerializer, SalaSerializer, ButacaSerializer
 from .serializers import ProyeccionSerializer
@@ -10,8 +10,8 @@ import datetime as dt
 import operator
 
 
-def principal(request):
-    return render(request, "principal.html")
+# def principal(request):
+#     return render(request, "principal.html")
 
 
 # Endpoint Peliculas
@@ -36,8 +36,6 @@ def pelis(request):
                             status=status.HTTP_400_BAD_REQUEST)
 
 
-
-# Ver que hacer con la respuesta de la pelicula
 # Endpoint pelicula especifica + rango de fecha
 @api_view(['GET'])
 def peli_detail(request, pk, inicio, fin):
@@ -267,7 +265,6 @@ def modificarProyeccion(request, pk):
                             status=status.HTTP_404_NOT_FOUND)
 
 
-# Arreglar y colocar butacas libres
 # Get + proyeccion + fecha
 @api_view(['GET'])
 def proyePeliRango(request, pk, fecha):

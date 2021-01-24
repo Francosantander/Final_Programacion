@@ -23,7 +23,7 @@ services:
     #image: "movies:1.0"
     image: "fervillano/movies:1.1"
     ports:
-      - "8000:8080"
+      - "5000:8080"
     links:
       - mysql
     depends_on:

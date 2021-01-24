@@ -3,6 +3,8 @@ from gestionCine import views
 
 urlpatterns = [
     # url(r'^principal$', views.principal),
+    # Actualizacion BD
+    url(r'^actualizacion$', views.actualizacion),
     # Endpoint Peliucla
     url(r'^peliculas$', views.pelis),
     url(r'^peliFecha/(\d{4}[-/]\d{2}[-/]\d{2})/(\d{4}[-/]\d{2}[-/]\d{2})$', views.peli_date_detail),
