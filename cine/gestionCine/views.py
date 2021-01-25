@@ -15,7 +15,7 @@ import operator
 
 
 # Endpoint Peliculas
-# Listado de peliculas en un rando de +- 15 dias
+# Listado de peliculas en un rango de +- 15 dias
 @api_view(['GET', 'POST'])
 def pelis(request):
     if request.method == 'GET':

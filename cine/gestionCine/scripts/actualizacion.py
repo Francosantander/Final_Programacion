@@ -52,5 +52,5 @@ def adaptar_datos(peliculas):
 def eliminar_id(peliculas):
     for pelicula in peliculas:
         # Elimino el ID ya que no siempre coincide con el ID de la BD del servicio
-        del pelicula['id']
+        del pelicula['ID_Peli']
     return peliculas
